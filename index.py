@@ -20,7 +20,7 @@ def isYoutube(link):
     return True if n>1 else False
 
 def isImage(link):
-    return True if link.lower().endswith(('.png', '.jpg', '.jpeg', '.avif', '.webp', '.tif', 'tiff')) else False
+    return True if link.lower().endswith(('.png', '.jpg', '.jpeg', '.avif', '.webp', '.tif', '.tiff')) else False
 
 def isCommand(cmd=None):
     match cmd.lower():
