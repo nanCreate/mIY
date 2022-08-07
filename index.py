@@ -32,14 +32,24 @@ def isCommand(cmd=None):
 
 def renderToVid(file, link):
     audBitrate = config["Audio"]["bitrate"]
+
+    match config["Main"]["OwnUtils"].lower():
+        case 'true':
+            ffmpeg_path = r'.\utils\ffmpeg.exe'
+            ytdlp_path = r'.\utils\yt-dlp.exe'
+        case 'false':
+            ffmpeg_path = 'ffmpeg.exe'
+            ytdlp_path = 'yt-dlp.exe'
+        case _:
+            errId(5)
+
     if(os.path.exists('temp.webm')): os.remove('temp.webm')
     if(os.path.exists('temp.wav')): os.remove('temp.wav')
-
-    os.system("yt-dlp -f 251 "+link+" -o temp.webm")
-    os.system('ffmpeg -i temp.webm temp.wav')
+    os.system(ytdlp_path+" -f 251 "+link+" -o temp.webm")
+    os.system(ffmpeg_path+' -i temp.webm temp.wav')
     os.remove('temp.webm')
     if(os.path.exists(file+'.webm')): os.remove(file+'.webm')
-    os.system('ffmpeg -r 10 -loop 1 -i "'+file+'" -i temp.wav -c:a libopus -b:a '+audBitrate+'K -c:v libvpx-vp9 -strict -2 -shortest "'+file+'.webm"')
+    os.system(ffmpeg_path+' -r 10 -loop 1 -i "'+file+'" -i temp.wav -c:a libopus -b:a '+audBitrate+'K -c:v libvpx-vp9 -strict -2 -shortest "'+file+'.webm"')
     os.remove('temp.wav')
 
     if(os.path.exists(file+'.webm')): 
@@ -52,6 +62,8 @@ def errId(id):
     def showNumErr(n):
         return ('::ОШИБКА '+str(n)+' ::')
 
+    setIcon(False)
+
     match id:
         case 1:
             print(showNumErr(1),'В буфере обмена не найдена ссылка на Youtube')
@@ -61,10 +73,11 @@ def errId(id):
             print(showNumErr(3),'Файл не является изображением')
         case 4:
             print(showNumErr(4),'Выходного файла не существует. Ошибка в рендере')
+        case 5:
+            print(showNumErr(5),'Ошибка в конфиге, проверьте !settings.ini')
+            end()
         case _:
             print(showNumErr('неизвестно'),'неизвестная ошибка')
-
-    setIcon(False)
 
 def shortcutCreator(path, target, wDir, icon):
     shell = Dispatch('WScript.Shell')
