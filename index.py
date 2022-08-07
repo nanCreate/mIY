@@ -35,8 +35,16 @@ def renderToVid(file, link):
 
     match config["Main"]["OwnUtils"].lower():
         case 'true':
-            ffmpeg_path = r'.\utils\ffmpeg.exe'
-            ytdlp_path = r'.\utils\yt-dlp.exe'
+            if (os.path.exists(r'.\utils\ffmpeg.exe') and os.path.exists(r'.\utils\yt-dlp.exe')):
+                ffmpeg_path = r'.\utils\ffmpeg.exe'
+                ytdlp_path = r'.\utils\yt-dlp.exe'
+            else: 
+                if (os.system('ffmpeg -version') or os.system('yt-dlp --version')):
+                    errId(6)
+                else: 
+                    print('Встроенные утилиты не найдены, но в вашем компьютере есть эти недостоющие зависимости. Измените в !settings.ini значение OwnUtils на false')
+                    errId(6)
+                
         case 'false':
             ffmpeg_path = 'ffmpeg.exe'
             ytdlp_path = 'yt-dlp.exe'
@@ -75,6 +83,9 @@ def errId(id):
             print(showNumErr(4),'Выходного файла не существует. Ошибка в рендере')
         case 5:
             print(showNumErr(5),'Ошибка в конфиге, проверьте !settings.ini')
+            end()
+        case 6:
+            print(showNumErr(6),'Не хватает утилит для выполнения рендера. Возможно, вы установили не полный пакет, поставьте полноценную версию')
             end()
         case _:
             print(showNumErr('неизвестно'),'неизвестная ошибка')
