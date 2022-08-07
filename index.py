@@ -1,6 +1,7 @@
 # coding=utf-8
 import sys, re, os, pyperclip, winshell, configparser
 from win32com.client import Dispatch
+
 # Сonfig
 config = configparser.ConfigParser()
 config.read('!settings.ini', encoding='utf-8')
