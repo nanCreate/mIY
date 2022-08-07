@@ -28,7 +28,6 @@ def isCommand(cmd=None):
 
     if (cmd.lower().startswith('хорошо призрачку')): 
         print('да, призрачку тоже хорошо :3')
-        setIcon(True)
 
 def renderToVid(file, link):
     audBitrate = config["Audio"]["bitrate"]
