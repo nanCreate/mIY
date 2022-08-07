@@ -99,9 +99,9 @@ def shortcutCreator(path, target, wDir, icon):
 
 def sendToBridgeCreator():
     fp = open('scr.cmd', 'w')
-    fp.write('***REMOVED***')
+    fp.write('@echo off')
     fp.write('\n')
-    fp.write('***REMOVED***')
+    fp.write('cls')
     fp.write('\n')
     fp.write('"'+sys.argv[0]+'"'+' %1')
     fp.close()
