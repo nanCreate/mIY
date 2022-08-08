@@ -1,5 +1,5 @@
 # coding=utf-8
-import sys, re, os, pyperclip, winshell, configparser
+import sys, re, os, pyperclip, winshell, configparser, codecs
 from win32com.client import Dispatch
 from PIL import Image
 
@@ -37,11 +37,8 @@ def isImage(link):
 def imageAutoResizer(path, limitWidth, limitHeight):
     image = Image.open(path)
     width, height = image.size
-    
-    print('\nOriginal Size: \nwidth:',width,'height:',height)
 
     if (width>limitWidth or height>limitHeight):
-        print('Resizing')
         currentDir = os.path.dirname(os.path.realpath(__file__))
         tempFile = r'\temp\result.png'
 
@@ -50,20 +47,15 @@ def imageAutoResizer(path, limitWidth, limitHeight):
         if (width > height):
             newHeight = round(limitHeight/s)
             newWidth = limitWidth
-            print('limitHeight')
-            print('height:',newHeight,'width:',newWidth)
         else:
             newHeight = limitHeight
             newWidth = round(limitHeight*s)
-            print('limitHeight')
-            print('height:',newHeight,'width:',newWidth)
         
         resize = image.resize((newWidth, newHeight))
         resize.save(currentDir+tempFile)
 
         return(currentDir+tempFile)
     else:
-        print('normal size')
         return(path)
 
 def isCommand(cmd=None):
@@ -176,6 +168,34 @@ if not (os.path.exists('scr.cmd')):
     print(':: Первоначальная установка завершена!')
     print(':: Нажмите любую клавишу, чтобы выйти')
     end()
+
+if not (os.path.exists('!settings.ini')):
+    # fp = open('!settings.ini', 'w', 'utf-8')
+    fp = codecs.open('!settings.ini', 'w', 'utf-8')
+    # fp.write(u'\ufeff')
+    fp.write('[Main]')
+    fp.write('\n')
+    fp.write('OwnUtils=true')
+    fp.write('\n')
+    fp.write('\n')
+    fp.write('[Shortcut]')
+    fp.write('\n')
+    fp.write('SendTo_Name=Картинку В Видео из юбуба')
+    fp.write('\n')
+    fp.write('\n')
+    fp.write('[Audio]')
+    fp.write('\n')
+    fp.write('bitrate=128')
+    fp.write('\n')
+    fp.write('\n')
+    fp.write('[Video]')
+    fp.write('\n')
+    fp.write('autoSizeChanger=true')
+    fp.write('\n')
+    fp.write('limitWidth=1920')
+    fp.write('\n')
+    fp.write('limitHeight=1080')
+    fp.close()
 
 # Main Program
 argCount = len(sys.argv)
