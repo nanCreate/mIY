@@ -1,6 +1,8 @@
 # coding=utf-8
-import sys, re, os, pyperclip, winshell, configparser
+import sys, re, os, pyperclip, winshell, configparser, codecs, random
 from win32com.client import Dispatch
+from decimal import Decimal
+from PIL import Image
 
 # Сonfig
 config = configparser.ConfigParser()
@@ -10,6 +12,15 @@ config.read('!settings.ini', encoding='utf-8')
 def getClipboard():
     data = pyperclip.paste()
     return(data)
+
+def cache(command):
+    match command:
+        case 'check':
+            if not (os.path.isdir('temp')):
+                os.makedirs('temp')
+        case 'clear':
+            for file in os.scandir('temp'):
+                os.remove(file.path)
 
 def isYoutube(link):
     link = link.lower()
@@ -21,17 +32,68 @@ def isYoutube(link):
     return True if n>1 else False
 
 def isImage(link):
-    return True if link.lower().endswith(('.png', '.jpg', '.jpeg', '.avif', '.webp', '.tif', '.tiff')) else False
+    return True if link.lower().endswith(('.png', '.jpg', '.jpeg', '.webp', '.tif', '.tiff')) else False
+
+def imageAutoResizer(path, limitWidth, limitHeight):
+    image = Image.open(path)
+    width, height = image.size
+
+    if (width>limitWidth or height>limitHeight):
+        currentDir = os.path.dirname(os.path.realpath(__file__))
+        tempFile = r'\temp\result.png'
+
+        s = width/height
+
+        if (width > height):
+            newHeight = round(limitWidth/s)
+            newWidth = limitWidth
+            print('original width:',width,'height:',height)
+            print('s:',s,'width:',newWidth,'height:',newHeight)
+        else:
+            newHeight = limitHeight
+            newWidth = round(limitHeight*s)
+        
+        resize = image.resize((newWidth, newHeight))
+        resize.save(currentDir+tempFile)
+
+        return(currentDir+tempFile)
+    else:
+        return(path)
 
 def isCommand(cmd=None):
     match cmd.lower():
         case 'exit': end('p')
 
-    if (cmd.lower().startswith('хорошо призрачку')): 
-        print('да, призрачку тоже хорошо :3')
+    if (cmd.lower().startswith('хорошо призрачку?')): 
+        words = ['порно', 'хентай', 'hentai', 'r34', 'rule 34', 'лисошиз']
+        clipboardData = getClipboard()
+        def finderWord(str_, words):
+            for word in words:
+                if word.lower() in str_.lower():
+                    return True
+            return False
+        
+        if (finderWord(clipboardData, words)):
+            idEgg = random.randint(1, 6)
+            match idEgg:
+                case 1: print('призрачку не нравится что у '+os.getlogin()+' содержится в буфере обмена 3:')
+                case 2: print('призрачку совсем не нравится что у '+os.getlogin()+' в буфере обмена 3:')
+                case 3: print('плохо призрачку в компьютере у '+os.getlogin()+' 3:')
+                case 4: print('призрачку не нравится что содержится в буфере обмена 3:')
+                case 5: print('призрачку не нравятся пошлости в буфере обмена 3:')
+                case 6: print('плохо призрачку 3:')
+        else:
+            idEgg = random.randint(1, 4)
+            match idEgg:
+                case 1: print('хорошо призрачку в компьютере '+os.getlogin()+' :3')
+                case 2: print('призрачку хорошо живётся в компьютере :3')
+                case 3: print('да, призрачку хорошо в компьютере :3')
+                case 4: print('хорошо призрачку, но призрачку будет лучше, когда '+os.getlogin()+' даст ссылочку на видео :3')
 
-def renderToVid(file, link):
+
+def renderToVid(outFile, file, link):
     audBitrate = config["Audio"]["bitrate"]
+    outFile = outFile+'.webm'
 
     match config["Main"]["OwnUtils"].lower():
         case 'true':
@@ -51,16 +113,12 @@ def renderToVid(file, link):
         case _:
             errId(5)
 
-    if(os.path.exists('temp.webm')): os.remove('temp.webm')
-    if(os.path.exists('temp.wav')): os.remove('temp.wav')
-    os.system(ytdlp_path+" -f 251 "+link+" -o temp.webm")
-    os.system(ffmpeg_path+' -i temp.webm temp.wav')
-    os.remove('temp.webm')
-    if(os.path.exists(file+'.webm')): os.remove(file+'.webm')
-    os.system(ffmpeg_path+' -r 10 -loop 1 -i "'+file+'" -i temp.wav -c:a libopus -b:a '+audBitrate+'K -c:v libvpx-vp9 -strict -2 -shortest "'+file+'.webm"')
-    os.remove('temp.wav')
+    os.system(ytdlp_path+" -f 251 "+link+r" -o temp\temp.webm")
+    os.system(ffmpeg_path+r' -i temp\temp.webm temp\temp.wav')
+    if(os.path.exists(outFile)): os.remove(outFile)
+    os.system(ffmpeg_path+' -r 10 -loop 1 -i "'+file+r'" -i temp\temp.wav -c:a libopus -b:a '+audBitrate+'K -c:v libvpx-vp9 -strict -2 -shortest "'+outFile+'"')
 
-    if(os.path.exists(file+'.webm')): 
+    if(os.path.exists(outFile)): 
         setIcon(True)
     else:
         errId(4)
@@ -83,12 +141,14 @@ def errId(id):
             print(showNumErr(4),'Выходного файла не существует. Ошибка в рендере')
         case 5:
             print(showNumErr(5),'Ошибка в конфиге, проверьте !settings.ini')
+            print(showNumErr(5),'Если удалите конфигурационный файл, то создастся рабочий с параметрами по умолчанию.')
             end()
         case 6:
             print(showNumErr(6),'Не хватает утилит для выполнения рендера. Возможно, вы установили не полный пакет, поставьте полноценную версию')
             end()
         case _:
             print(showNumErr('неизвестно'),'неизвестная ошибка')
+            end()
 
 def shortcutCreator(path, target, wDir, icon):
     shell = Dispatch('WScript.Shell')
@@ -136,8 +196,37 @@ if not (os.path.exists('scr.cmd')):
     print(':: Нажмите любую клавишу, чтобы выйти')
     end()
 
+if not (os.path.exists('!settings.ini')):
+    # Да что вы знаете о безумии? :3
+    fp = codecs.open('!settings.ini', 'w', 'utf-8')
+    fp.write('[Main]')
+    fp.write('\n')
+    fp.write('OwnUtils=true')
+    fp.write('\n')
+    fp.write('\n')
+    fp.write('[Shortcut]')
+    fp.write('\n')
+    fp.write('SendTo_Name=Картинку В Видео из юбуба')
+    fp.write('\n')
+    fp.write('\n')
+    fp.write('[Audio]')
+    fp.write('\n')
+    fp.write('bitrate=128')
+    fp.write('\n')
+    fp.write('\n')
+    fp.write('[Video]')
+    fp.write('\n')
+    fp.write('autoSizeChanger=true')
+    fp.write('\n')
+    fp.write('limitWidth=1920')
+    fp.write('\n')
+    fp.write('limitHeight=1080')
+    fp.close()
+
 # Main Program
 argCount = len(sys.argv)
+cache('check')
+cache('clear')
 
 if argCount > 1:
     argFileLink = sys.argv[1]
@@ -152,7 +241,18 @@ if argCount > 1:
         isCommand(videoLink)
     else:
         print('DEB: призрачек приступает к работе :3')
-        renderToVid(argFileLink, videoLink)
+
+        match (config["Video"]["autoSizeChanger"].lower()):
+            case 'true':
+                FileLink = imageAutoResizer(argFileLink, int(config["Video"]["limitWidth"]), int(config["Video"]["limitHeight"]))
+            case 'false':
+                FileLink = argFileLink
+            case _:
+                errId(5)
+
+        renderToVid(argFileLink, FileLink, videoLink)
+
+        cache('clear')
 else:
     errId(2)
     end()
