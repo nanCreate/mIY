@@ -32,7 +32,7 @@ def isYoutube(link):
     return True if n>1 else False
 
 def isImage(link):
-    return True if link.lower().endswith(('.png', '.jpg', '.jpeg', '.avif', '.webp', '.tif', '.tiff')) else False
+    return True if link.lower().endswith(('.png', '.jpg', '.jpeg', '.webp', '.tif', '.tiff')) else False
 
 def imageAutoResizer(path, limitWidth, limitHeight):
     image = Image.open(path)
@@ -129,6 +129,7 @@ def errId(id):
             end()
         case _:
             print(showNumErr('неизвестно'),'неизвестная ошибка')
+            end()
 
 def shortcutCreator(path, target, wDir, icon):
     shell = Dispatch('WScript.Shell')
@@ -195,8 +196,17 @@ if argCount > 1:
     else:
         print('DEB: призрачек приступает к работе :3')
 
-        FileLink = imageAutoResizer(argFileLink, 1000, 1000)
+        match (config["Video"]["autoSizeChanger"].lower()):
+            case 'true':
+                FileLink = imageAutoResizer(argFileLink, int(config["Video"]["limitWidth"]), int(config["Video"]["limitHeight"]))
+            case 'false':
+                FileLink = argFileLink
+            case _:
+                errId(5)
+
         renderToVid(argFileLink, FileLink, videoLink)
+
+        cache('clear')
 else:
     errId(2)
     end()
