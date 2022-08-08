@@ -1,6 +1,7 @@
 # coding=utf-8
-import sys, re, os, pyperclip, winshell, configparser, codecs
+import sys, re, os, pyperclip, winshell, configparser, codecs, random
 from win32com.client import Dispatch
+from decimal import Decimal
 from PIL import Image
 
 # Сonfig
@@ -15,7 +16,6 @@ def getClipboard():
 def cache(command):
     match command:
         case 'check':
-            print('проверка кэша')
             if not (os.path.isdir('temp')):
                 os.makedirs('temp')
         case 'clear':
@@ -45,8 +45,10 @@ def imageAutoResizer(path, limitWidth, limitHeight):
         s = width/height
 
         if (width > height):
-            newHeight = round(limitHeight/s)
+            newHeight = round(limitWidth/s)
             newWidth = limitWidth
+            print('original width:',width,'height:',height)
+            print('s:',s,'width:',newWidth,'height:',newHeight)
         else:
             newHeight = limitHeight
             newWidth = round(limitHeight*s)
@@ -62,8 +64,32 @@ def isCommand(cmd=None):
     match cmd.lower():
         case 'exit': end('p')
 
-    if (cmd.lower().startswith('хорошо призрачку')): 
-        print('да, призрачку тоже хорошо :3')
+    if (cmd.lower().startswith('хорошо призрачку?')): 
+        words = ['порно', 'хентай', 'hentai', 'r34', 'rule 34', 'лисошиз']
+        clipboardData = getClipboard()
+        def finderWord(str_, words):
+            for word in words:
+                if word.lower() in str_.lower():
+                    return True
+            return False
+        
+        if (finderWord(clipboardData, words)):
+            idEgg = random.randint(1, 6)
+            match idEgg:
+                case 1: print('призрачку не нравится что у '+os.getlogin()+' содержится в буфере обмена 3:')
+                case 2: print('призрачку совсем не нравится что у '+os.getlogin()+' в буфере обмена 3:')
+                case 3: print('плохо призрачку в компьютере у '+os.getlogin()+' 3:')
+                case 4: print('призрачку не нравится что содержится в буфере обмена 3:')
+                case 5: print('призрачку не нравятся пошлости в буфере обмена 3:')
+                case 6: print('плохо призрачку 3:')
+        else:
+            idEgg = random.randint(1, 4)
+            match idEgg:
+                case 1: print('хорошо призрачку в компьютере '+os.getlogin()+' :3')
+                case 2: print('призрачку хорошо живётся в компьютере :3')
+                case 3: print('да, призрачку хорошо в компьютере :3')
+                case 4: print('хорошо призрачку, но призрачку будет лучше, когда '+os.getlogin()+' даст ссылочку на видео :3')
+
 
 def renderToVid(outFile, file, link):
     audBitrate = config["Audio"]["bitrate"]
@@ -115,6 +141,7 @@ def errId(id):
             print(showNumErr(4),'Выходного файла не существует. Ошибка в рендере')
         case 5:
             print(showNumErr(5),'Ошибка в конфиге, проверьте !settings.ini')
+            print(showNumErr(5),'Если удалите конфигурационный файл, то создастся рабочий с параметрами по умолчанию.')
             end()
         case 6:
             print(showNumErr(6),'Не хватает утилит для выполнения рендера. Возможно, вы установили не полный пакет, поставьте полноценную версию')
@@ -170,9 +197,8 @@ if not (os.path.exists('scr.cmd')):
     end()
 
 if not (os.path.exists('!settings.ini')):
-    # fp = open('!settings.ini', 'w', 'utf-8')
+    # Да что вы знаете о безумии? :3
     fp = codecs.open('!settings.ini', 'w', 'utf-8')
-    # fp.write(u'\ufeff')
     fp.write('[Main]')
     fp.write('\n')
     fp.write('OwnUtils=true')
