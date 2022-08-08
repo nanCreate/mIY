@@ -12,6 +12,16 @@ def getClipboard():
     data = pyperclip.paste()
     return(data)
 
+def cache(command):
+    match command:
+        case 'check':
+            print('проверка кэша')
+            if not (os.path.isdir('temp')):
+                os.makedirs('temp')
+        case 'clear':
+            for file in os.scandir('temp'):
+                os.remove(file.path)
+
 def isYoutube(link):
     link = link.lower()
     n = 0
@@ -34,7 +44,6 @@ def imageAutoResizer(path, limitWidth, limitHeight):
         print('Resizing')
         currentDir = os.path.dirname(os.path.realpath(__file__))
         tempFile = r'\temp\result.png'
-        
 
         s = width/height
 
@@ -86,14 +95,10 @@ def renderToVid(outFile, file, link):
         case _:
             errId(5)
 
-    if(os.path.exists('temp.webm')): os.remove('temp.webm')
-    if(os.path.exists('temp.wav')): os.remove('temp.wav')
-    os.system(ytdlp_path+" -f 251 "+link+" -o temp.webm")
-    os.system(ffmpeg_path+' -i temp.webm temp.wav')
-    os.remove('temp.webm')
-    if(os.path.exists(file+'.webm')): os.remove(file+'.webm')
-    os.system(ffmpeg_path+' -r 10 -loop 1 -i "'+file+'" -i temp.wav -c:a libopus -b:a '+audBitrate+'K -c:v libvpx-vp9 -strict -2 -shortest "'+outFile+'"')
-    os.remove('temp.wav')
+    os.system(ytdlp_path+" -f 251 "+link+r" -o temp\temp.webm")
+    os.system(ffmpeg_path+r' -i temp\temp.webm temp\temp.wav')
+    if(os.path.exists(outFile)): os.remove(outFile)
+    os.system(ffmpeg_path+' -r 10 -loop 1 -i "'+file+r'" -i temp\temp.wav -c:a libopus -b:a '+audBitrate+'K -c:v libvpx-vp9 -strict -2 -shortest "'+outFile+'"')
 
     if(os.path.exists(outFile)): 
         setIcon(True)
@@ -173,6 +178,8 @@ if not (os.path.exists('scr.cmd')):
 
 # Main Program
 argCount = len(sys.argv)
+cache('check')
+cache('clear')
 
 if argCount > 1:
     argFileLink = sys.argv[1]
@@ -189,8 +196,6 @@ if argCount > 1:
         print('DEB: призрачек приступает к работе :3')
 
         FileLink = imageAutoResizer(argFileLink, 1000, 1000)
-        print('Путь к файлу: ', FileLink)
-        input('Подумаем')
         renderToVid(argFileLink, FileLink, videoLink)
 else:
     errId(2)
