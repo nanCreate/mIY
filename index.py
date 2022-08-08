@@ -24,16 +24,6 @@ def isYoutube(link):
 def isImage(link):
     return True if link.lower().endswith(('.png', '.jpg', '.jpeg', '.avif', '.webp', '.tif', '.tiff')) else False
 
-def resizeImage(link):
-    print('hi')
-
-def isCommand(cmd=None):
-    match cmd.lower():
-        case 'exit': end('p')
-
-    if (cmd.lower().startswith('хорошо призрачку')): 
-        print('да, призрачку тоже хорошо :3')
-
 def imageAutoResizer(path, limitWidth, limitHeight):
     image = Image.open(path)
     width, height = image.size
@@ -42,7 +32,9 @@ def imageAutoResizer(path, limitWidth, limitHeight):
 
     if (width>limitWidth or height>limitHeight):
         print('Resizing')
+        currentDir = os.path.dirname(os.path.realpath(__file__))
         tempFile = r'\temp\result.png'
+        
 
         s = width/height
 
@@ -58,16 +50,23 @@ def imageAutoResizer(path, limitWidth, limitHeight):
             print('height:',newHeight,'width:',newWidth)
         
         resize = image.resize((newWidth, newHeight))
-        resize.save(tempFile)
+        resize.save(currentDir+tempFile)
 
-        currentDir = os.path.dirname(os.path.realpath(__file__))
         return(currentDir+tempFile)
     else:
         print('normal size')
         return(path)
 
-def renderToVid(file, link):
+def isCommand(cmd=None):
+    match cmd.lower():
+        case 'exit': end('p')
+
+    if (cmd.lower().startswith('хорошо призрачку')): 
+        print('да, призрачку тоже хорошо :3')
+
+def renderToVid(outFile, file, link):
     audBitrate = config["Audio"]["bitrate"]
+    outFile = outFile+'.webm'
 
     match config["Main"]["OwnUtils"].lower():
         case 'true':
@@ -93,10 +92,10 @@ def renderToVid(file, link):
     os.system(ffmpeg_path+' -i temp.webm temp.wav')
     os.remove('temp.webm')
     if(os.path.exists(file+'.webm')): os.remove(file+'.webm')
-    os.system(ffmpeg_path+' -r 10 -loop 1 -i "'+file+'" -i temp.wav -c:a libopus -b:a '+audBitrate+'K -c:v libvpx-vp9 -strict -2 -shortest "'+file+'.webm"')
+    os.system(ffmpeg_path+' -r 10 -loop 1 -i "'+file+'" -i temp.wav -c:a libopus -b:a '+audBitrate+'K -c:v libvpx-vp9 -strict -2 -shortest "'+outFile+'"')
     os.remove('temp.wav')
 
-    if(os.path.exists(file+'.webm')): 
+    if(os.path.exists(outFile)): 
         setIcon(True)
     else:
         errId(4)
@@ -189,7 +188,10 @@ if argCount > 1:
     else:
         print('DEB: призрачек приступает к работе :3')
 
-        renderToVid(argFileLink, videoLink)
+        FileLink = imageAutoResizer(argFileLink, 1000, 1000)
+        print('Путь к файлу: ', FileLink)
+        input('Подумаем')
+        renderToVid(argFileLink, FileLink, videoLink)
 else:
     errId(2)
     end()
