@@ -1,7 +1,6 @@
 # coding=utf-8
 import sys, re, os, pyperclip, winshell, configparser, codecs, random
 from win32com.client import Dispatch
-from decimal import Decimal
 from PIL import Image
 
 # Сonfig
