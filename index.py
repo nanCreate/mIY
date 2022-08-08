@@ -1,6 +1,7 @@
 # coding=utf-8
 import sys, re, os, pyperclip, winshell, configparser
 from win32com.client import Dispatch
+from PIL import Image
 
 # Сonfig
 config = configparser.ConfigParser()
@@ -23,7 +24,7 @@ def isYoutube(link):
 def isImage(link):
     return True if link.lower().endswith(('.png', '.jpg', '.jpeg', '.avif', '.webp', '.tif', '.tiff')) else False
 
-def resizeImage(link)
+def resizeImage(link):
     print('hi')
 
 def isCommand(cmd=None):
@@ -32,6 +33,38 @@ def isCommand(cmd=None):
 
     if (cmd.lower().startswith('хорошо призрачку')): 
         print('да, призрачку тоже хорошо :3')
+
+def imageAutoResizer(path, limitWidth, limitHeight):
+    image = Image.open(path)
+    width, height = image.size
+    
+    print('\nOriginal Size: \nwidth:',width,'height:',height)
+
+    if (width>limitWidth or height>limitHeight):
+        print('Resizing')
+        tempFile = r'\temp\result.png'
+
+        s = width/height
+
+        if (width > height):
+            newHeight = round(limitHeight/s)
+            newWidth = limitWidth
+            print('limitHeight')
+            print('height:',newHeight,'width:',newWidth)
+        else:
+            newHeight = limitHeight
+            newWidth = round(limitHeight*s)
+            print('limitHeight')
+            print('height:',newHeight,'width:',newWidth)
+        
+        resize = image.resize((newWidth, newHeight))
+        resize.save(tempFile)
+
+        currentDir = os.path.dirname(os.path.realpath(__file__))
+        return(currentDir+tempFile)
+    else:
+        print('normal size')
+        return(path)
 
 def renderToVid(file, link):
     audBitrate = config["Audio"]["bitrate"]
@@ -155,6 +188,7 @@ if argCount > 1:
         isCommand(videoLink)
     else:
         print('DEB: призрачек приступает к работе :3')
+
         renderToVid(argFileLink, videoLink)
 else:
     errId(2)
