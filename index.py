@@ -23,6 +23,9 @@ def isYoutube(link):
 def isImage(link):
     return True if link.lower().endswith(('.png', '.jpg', '.jpeg', '.avif', '.webp', '.tif', '.tiff')) else False
 
+def resizeImage(link)
+    print('hi')
+
 def isCommand(cmd=None):
     match cmd.lower():
         case 'exit': end('p')
