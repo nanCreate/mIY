@@ -129,7 +129,7 @@ def isCommand(cmd=None):
                     )
 
 
-def renderToVid(outFile, file, link, type="image"):
+def renderToVid(outFile, file, link, type):
     audBitrate = config["Audio"]["bitrate"]
     outFile = outFile + ".webm"
 
@@ -161,7 +161,6 @@ def renderToVid(outFile, file, link, type="image"):
         os.remove(outFile)
 
     if type == "image":
-        input("DEB: func render video")
         os.system(
             ffmpeg_path
             + ' -r 10 -loop 1 -i "'
@@ -172,8 +171,7 @@ def renderToVid(outFile, file, link, type="image"):
             + outFile
             + '"'
         )
-    elif type == "video":
-        input("DEB: func render video")
+    elif type == "animation":
         os.system(
             ffmpeg_path
             + ' -stream_loop -1 -i "'
@@ -182,7 +180,6 @@ def renderToVid(outFile, file, link, type="image"):
             + outFile
             + '"'
         )
-        input()
 
     if os.path.exists(outFile):
         setIcon(True)
@@ -203,7 +200,7 @@ def errId(id):
         case 2:
             print(showNumErr(2), "Недостаточно аргументов")
         case 3:
-            print(showNumErr(3), "Файл не является изображением")
+            print(showNumErr(3), "Файл не является изображением/видео")
         case 4:
             print(showNumErr(4), "Выходного файла не существует. Ошибка в рендере")
         case 5:
@@ -317,8 +314,6 @@ if argCount > 1:
     argFileLink = sys.argv[1]
 
     if fileType(argFileLink) == "image":
-        print("DEB: render image")
-
         match (config["Video"]["autoSizeChanger"].lower()):
             case "true":
                 FileLink = imageAutoResizer(
@@ -334,28 +329,12 @@ if argCount > 1:
         renderToVid(argFileLink, FileLink, videoLink, "image")
 
     elif fileType(argFileLink) == "animation":
-        print("DEB: render video")
-
         FileLink = argFileLink
         renderToVid(argFileLink, FileLink, videoLink, "animation")
+
     else:
         errId(3)
         end()
-
-    # print("DEB: призрачек приступает к работе :3")
-    # match (config["Video"]["autoSizeChanger"].lower()):
-    #     case "true":
-    #         FileLink = imageAutoResizer(
-    #             argFileLink,
-    #             int(config["Video"]["limitWidth"]),
-    #             int(config["Video"]["limitHeight"]),
-    #         )
-    #     case "false":
-    #         FileLink = argFileLink
-    #     case _:
-    #         errId(5)
-
-    # renderToVid(argFileLink, FileLink, videoLink)
 
     cache("clear")
 else:
