@@ -2,6 +2,7 @@
 import sys, re, os, pyperclip, winshell, configparser, codecs, random
 from win32com.client import Dispatch
 from PIL import Image
+from win10toast import ToastNotifier
 
 # Сonfig
 config = configparser.ConfigParser()
@@ -183,9 +184,28 @@ def renderToVid(outFile, file, link, type):
 
     if os.path.exists(outFile):
         setIcon(True)
+        notify("done")
     else:
+        notify("undone")
         errId(4)
         end()
+
+
+def notify(type):
+    def notify(header, text=" ", delay=3, icon="icons/m_h.ico"):
+        ToastNotifier().show_toast(
+            header,
+            text,
+            duration=delay,
+            icon_path=icon,
+            threaded=True,
+        )
+
+    match type.lower():
+        case "done":
+            notify("Готово!")
+        case "undone":
+            notify("ошибка", " ", 3, "icons/m_s.ico")
 
 
 def errId(id):
