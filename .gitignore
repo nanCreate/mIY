@@ -2,3 +2,4 @@ scr.cmd
 test.py
 /utils
 /temp
+/__pycache__
