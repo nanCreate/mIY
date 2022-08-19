@@ -1,5 +1,5 @@
 # coding=utf-8
-import sys, re, os, pyperclip, winshell, configparser, codecs, random
+import sys, re, os, pyperclip, winshell, configparser, codecs, random, time
 from win32com.client import Dispatch
 from PIL import Image
 from win10toast import ToastNotifier
@@ -206,6 +206,8 @@ def notify(type):
             notify("Готово!")
         case "undone":
             notify("ошибка", " ", 3, "icons/m_s.ico")
+        case "firstrun":
+            notify("Готово!", "Установка завершена", 5)
 
 
 def errId(id):
@@ -278,6 +280,9 @@ def end(code=None):
     match code:
         case "p":
             sys.exit()
+        case "sleep":
+            time.sleep(5)
+            sys.exit()
         case _:
             input()
             sys.exit()
@@ -287,9 +292,9 @@ def end(code=None):
 if not (os.path.exists("scr.cmd")):
     sendToBridgeCreator()
     setIcon(True)
-    print(":: Первоначальная установка завершена!")
-    print(":: Нажмите любую клавишу, чтобы выйти")
-    end()
+    notify("firstRun")
+    print(":: Первоначальная настройка завершена!")
+    end("p")
 
 if not (os.path.exists("!settings.ini")):
     # Да что вы знаете о безумии? :3
@@ -324,14 +329,23 @@ cache("check")
 cache("clear")
 
 if argCount > 1:
+    argFileLink = sys.argv[1]
+
+    if argFileLink.lower() == "uninstall":
+        linkName = config["Shortcut"]["SendTo_Name"] + ".lnk"
+        sendTo = winshell.sendto()
+        path = os.path.join(sendTo, linkName)
+
+        if os.path.exists(path):
+            os.remove(path)
+
+        end("p")
 
     videoLink = getClipboard()
     while isYoutube(videoLink) == False:
         errId(1)
         videoLink = input("Введите ссылку: ")
         isCommand(videoLink)
-
-    argFileLink = sys.argv[1]
 
     if fileType(argFileLink) == "image":
         match (config["Video"]["autoSizeChanger"].lower()):
@@ -359,4 +373,4 @@ if argCount > 1:
     cache("clear")
 else:
     errId(2)
-    end()
+    end("sleep")
